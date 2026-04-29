@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}تسجيل الدخول — APD-ML-ES{% endblock %}
+{% block content %}
+<section class="section page-auth">
+    <div class="container container-auth">
+        <h1 class="page-title">تسجيل الدخول</h1>
+        <p class="section-hint">أدخل بريدك وكلمة المرور للوصول إلى لوحة التحكم.</p>
+        <form class="auth-form" method="post" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="next" value="{{ next_param or '' }}">
+            <label class="auth-label" for="email">البريد الإلكتروني</label>
+            <input class="auth-input" type="email" name="email" id="email" value="{{ email or '' }}" required autocomplete="username">
+
+            <label class="auth-label" for="password">كلمة المرور</label>
+            <input class="auth-input" type="password" name="password" id="password" required autocomplete="current-password">
+
+            <button type="submit" class="btn btn-primary auth-submit">
+                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                <span>دخول</span>
+            </button>
+        </form>
+        <p class="auth-switch">ليس لديك حساب؟ <a href="{{ url_for('auth.register') }}">إنشاء حساب</a></p>
+    </div>
+</section>
+{% endblock %}

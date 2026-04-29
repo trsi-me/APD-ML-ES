@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}لوحة التحكم — APD-ML-ES{% endblock %}
+{% block content %}
+<section class="section dashboard-page">
+    <div class="container">
+        <h1 class="page-title">لوحة التحكم</h1>
+
+        <div class="metric-strip metric-strip--board" id="dashboard-stats">
+            <div class="metric-item">
+                <i class="fa-solid fa-chart-pie metric-ic" aria-hidden="true"></i>
+                <span class="metric-val" id="dash-total">{{ stats.total_analyzed }}</span>
+                <span class="metric-lbl">إجمالي التحليلات</span>
+            </div>
+            <span class="metric-sep" aria-hidden="true"></span>
+            <div class="metric-item metric-item--phish">
+                <i class="fa-solid fa-triangle-exclamation metric-ic" aria-hidden="true"></i>
+                <span class="metric-val stat-danger" id="dash-phish">{{ stats.total_phishing }}</span>
+                <span class="metric-lbl">تصيد</span>
+            </div>
+            <span class="metric-sep" aria-hidden="true"></span>
+            <div class="metric-item metric-item--ok">
+                <i class="fa-solid fa-shield-halved metric-ic" aria-hidden="true"></i>
+                <span class="metric-val stat-success" id="dash-legit">{{ stats.total_legitimate }}</span>
+                <span class="metric-lbl">شرعي</span>
+            </div>
+            <span class="metric-sep" aria-hidden="true"></span>
+            <div class="metric-item">
+                <i class="fa-solid fa-chart-line metric-ic" aria-hidden="true"></i>
+                <span class="metric-val" id="dash-pct">{{ stats.phishing_percentage }}٪</span>
+                <span class="metric-lbl">نسبة التصيد</span>
+            </div>
+        </div>
+
+        <div class="table-block">
+            <div class="table-head-row">
+                <h2 class="table-title">آخر التحليلات</h2>
+                <button type="button" class="btn btn-primary btn-small" id="btn-refresh" onclick="loadHistory(); loadDashboardStats();">
+                    <i class="fa-solid fa-rotate" aria-hidden="true"></i> تحديث البيانات
+                </button>
+            </div>
+            <div class="table-scroll">
+                <table class="data-table" id="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>معاينة البريد</th>
+                            <th>النتيجة</th>
+                            <th>الثقة</th>
+                            <th>التاريخ</th>
+                            <th>حذف</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboard-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dist-block">
+            <h2 class="section-title section-title-sm">التوزيع</h2>
+            <p class="section-hint">نسبة التصيد مقابل البريد الشرعي</p>
+            <div class="dist-bar" id="dist-bar" role="img" aria-label="توزيع التصيد والبريد الشرعي">
+                <span class="dist-seg dist-phish" id="dist-phish-seg" style="width: {{ stats.phishing_percentage }}%"></span>
+                <span class="dist-seg dist-legit" id="dist-legit-seg" style="width: {{ stats.legitimate_percentage }}%"></span>
+            </div>
+            <p class="dist-legend">
+                <span class="leg-dot leg-phish"></span> تصيد
+                <span class="leg-dot leg-legit"></span> شرعي
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

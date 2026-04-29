@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}الملف الشخصي — APD-ML-ES{% endblock %}
+{% block content %}
+<section class="section page-auth page-profile">
+    <div class="container container-auth container-profile">
+        <h1 class="page-title">الملف الشخصي</h1>
+        <p class="section-hint">عدّل اسمك وبيانات الاتصال والبريد وكلمة المرور. لتغيير البريد أو كلمة المرور يلزم إدخال كلمة المرور الحالية.</p>
+
+        <form class="auth-form profile-form" method="post" action="{{ url_for('auth.profile') }}">
+            <label class="auth-label" for="full_name">الاسم الظاهر</label>
+            <input class="auth-input" type="text" name="full_name" id="full_name" value="{{ user['full_name'] or '' }}" autocomplete="name">
+
+            <label class="auth-label" for="email">البريد الإلكتروني</label>
+            <input class="auth-input" type="email" name="email" id="email" value="{{ user['email'] or '' }}" required autocomplete="email">
+
+            <label class="auth-label" for="phone">رقم الجوال (اختياري)</label>
+            <input class="auth-input" type="tel" name="phone" id="phone" value="{{ user['phone'] or '' }}" autocomplete="tel" inputmode="tel" placeholder="مثال: 05xxxxxxxx">
+
+            <label class="auth-label" for="bio">نبذة (اختياري)</label>
+            <textarea class="auth-input profile-bio" name="bio" id="bio" rows="3" maxlength="500" placeholder="نبذة قصيرة…">{{ user['bio'] or '' }}</textarea>
+
+            <h2 class="profile-subtitle">تغيير كلمة المرور (اختياري)</h2>
+            <p class="section-hint profile-mini-hint">اترك الحقول فارغة إن لم ترغب بتغييرها.</p>
+
+            <label class="auth-label" for="new_password">كلمة مرور جديدة</label>
+            <input class="auth-input" type="password" name="new_password" id="new_password" minlength="8" autocomplete="new-password" placeholder="8 أحرف على الأقل">
+
+            <label class="auth-label" for="new_password_confirm">تأكيد كلمة المرور</label>
+            <input class="auth-input" type="password" name="new_password_confirm" id="new_password_confirm" minlength="8" autocomplete="new-password" placeholder="تكرار كلمة المرور الجديدة">
+
+            <h2 class="profile-subtitle">تأكيد الهوية</h2>
+            <p class="section-hint profile-mini-hint">مطلوبة عند تغيير البريد الإلكتروني أو تعيين كلمة مرور جديدة.</p>
+
+            <label class="auth-label" for="current_password">كلمة المرور الحالية</label>
+            <input class="auth-input" type="password" name="current_password" id="current_password" autocomplete="current-password" placeholder="••••••••">
+
+            <button type="submit" class="btn btn-primary auth-submit">
+                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+                <span>حفظ التغييرات</span>
+            </button>
+        </form>
+
+        <div class="profile-footer-actions">
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary profile-logout">
+                <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                <span>تسجيل خروج</span>
+            </a>
+            <a href="{{ url_for('main.dashboard') }}" class="auth-switch-link">العودة إلى لوحة التحكم</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}إنشاء حساب — APD-ML-ES{% endblock %}
+{% block content %}
+<section class="section page-auth">
+    <div class="container container-auth">
+        <h1 class="page-title">إنشاء حساب</h1>
+        <p class="section-hint">أنشئ حساباً لعرض لوحة التحكم وسجل التحليلات.</p>
+        <form class="auth-form" method="post" action="{{ url_for('auth.register') }}">
+            <label class="auth-label" for="full_name">الاسم (اختياري)</label>
+            <input class="auth-input" type="text" name="full_name" id="full_name" value="{{ full_name or '' }}" autocomplete="name">
+
+            <label class="auth-label" for="email">البريد الإلكتروني</label>
+            <input class="auth-input" type="email" name="email" id="email" value="{{ email or '' }}" required autocomplete="email">
+
+            <label class="auth-label" for="password">كلمة المرور (8 أحرف على الأقل)</label>
+            <input class="auth-input" type="password" name="password" id="password" required minlength="8" autocomplete="new-password">
+
+            <label class="auth-label" for="password_confirm">تأكيد كلمة المرور</label>
+            <input class="auth-input" type="password" name="password_confirm" id="password_confirm" required minlength="8" autocomplete="new-password">
+
+            <button type="submit" class="btn btn-primary auth-submit">
+                <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                <span>تسجيل</span>
+            </button>
+        </form>
+        <p class="auth-switch">لديك حساب؟ <a href="{{ url_for('auth.login') }}">تسجيل الدخول</a></p>
+    </div>
+</section>
+{% endblock %}

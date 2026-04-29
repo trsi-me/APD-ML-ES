@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}عن المشروع — APD-ML-ES{% endblock %}
+{% block content %}
+<section class="section about-page">
+    <div class="container container-narrow">
+        <h1 class="page-title">An Application for Phishing Detection Using Machine Learning in Email Systems</h1>
+        <p class="about-lead">
+            تطبيق ويب ذكي يكشف رسائل التصيد الاحتيالي في بيئات البريد الإلكتروني باستخدام تعلم الآلة ومعالجة النصوص،
+            لمساعدة المستخدمين على التمييز بين الرسائل الشرعية والاحتيالية قبل الوقوع في الخسارة.
+        </p>
+
+        <h2 class="section-title">أعضاء الفريق</h2>
+        <div class="table-scroll">
+            <table class="data-table about-table">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>الرقم</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Wiam Ali Al-Jari</td><td>461200475</td></tr>
+                    <tr><td>Taif Hussein Al-Enazi</td><td>452217149</td></tr>
+                    <tr><td>Sarah Obaid Al-Rashidi</td><td>452217215</td></tr>
+                    <tr><td>Ghala Suwailam Al-Harbi</td><td>452217090</td></tr>
+                    <tr><td>Abrar Khaled Al-Enazi</td><td>452217153</td></tr>
+                    <tr><td>Bashayer Yahya Mazyadi</td><td>461200381</td></tr>
+                    <tr><td>Renad Suleiman</td><td>461200474</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="about-meta">المشرف: د. شيراز البشير الحق</p>
+        <p class="about-meta">الجامعة: جامعة القصيم — الكلية التطبيقية — قسم الأمن السيبراني</p>
+        <p class="about-meta">السنة: 2026م / 1447هـ</p>
+
+        <h2 class="section-title">التقنيات المستخدمة</h2>
+        <p class="about-block">Python، Flask، scikit-learn، TF-IDF، Random Forest، SQLite، HTML/CSS/JS، IBM Plex Sans Arabic</p>
+
+        <h2 class="section-title">كيف يعمل النموذج؟</h2>
+        <p class="about-block">
+            نحوّل نص البريد إلى أرقام باستخدام TF-IDF: الكلمات التي تتكرر كثيراً في كل الرسائل أقل أهمية،
+            أما النادرة والمميزة فتحصل على وزن أعلى. ثم نمرّر هذه الأرقام إلى نموذج Random Forest: مجموعة أشجار قرار
+            تتعاون كأنها تصوّت أغلبية، فيخرج التصنيف نهائياً مع احتمالات ثقة.
+        </p>
+    </div>
+</section>
+{% endblock %}

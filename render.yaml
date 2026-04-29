@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: apd-ml-es
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn wsgi:app --workers 1 --timeout 60 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PATH
+        value: c9a4m7-p2k8-qv1r
+      - key: ADMIN_PASSWORD
+        sync: false
+
+    # ملاحظة: الخطة المجانية لا تدعم الأقراص الدائمة.
+    # إذا أردت الاحتفاظ بقاعدة البيانات بين عمليات الإعادة، فعّل السطور التالية
+    # (يتطلب خطة مدفوعة):
+    #
+    # disk:
+    #   name: apd-data
+    #   mountPath: /opt/render/project/src/data
+    #   sizeGB: 1

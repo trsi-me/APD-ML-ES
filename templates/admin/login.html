@@ -1,0 +1,21 @@
+{% extends "admin/base.html" %}
+{% block title %}دخول — نظام التشغيل{% endblock %}
+{% block body %}
+<div class="admin-login-wrap">
+    <div class="admin-login-card">
+        <div class="admin-login-head">
+            <i class="fa-solid fa-fingerprint" aria-hidden="true"></i>
+        </div>
+        <h1 class="admin-login-title">نظام التشغيل</h1>
+        <p class="admin-login-hint">أدخل كلمة المرور للمتابعة</p>
+        {% if error %}
+        <p class="admin-error" role="alert">{{ error }}</p>
+        {% endif %}
+        <form class="admin-login-form" method="post" action="{{ url_for('admin.login') }}">
+            <label class="admin-label" for="apwd">كلمة المرور</label>
+            <input class="admin-input" type="password" name="password" id="apwd" autocomplete="current-password" required>
+            <button type="submit" class="admin-btn admin-btn-primary"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> دخول</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

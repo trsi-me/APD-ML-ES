@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}الرئيسية — APD-ML-ES{% endblock %}
+{% block content %}
+<section class="hero hero--mesh">
+    <div class="container">
+        <h1 class="hero-title">كاشف رسائل التصيد الاحتيالي</h1>
+        <p class="hero-sub">تحليل نصوص البريد والمرفقات (نص/ PDF / صور عند تثبيت tesseract) مع نموذج تعلم آلي مدرّب على بيانات بريد إنجليزي واقعية</p>
+        <div class="metric-strip" id="hero-stats" aria-live="polite">
+            <div class="metric-item">
+                <i class="fa-solid fa-chart-pie metric-ic" aria-hidden="true"></i>
+                <span class="metric-val" id="stat-total">—</span>
+                <span class="metric-lbl">إجمالي التحليلات</span>
+            </div>
+            <span class="metric-sep" aria-hidden="true"></span>
+            <div class="metric-item metric-item--phish">
+                <i class="fa-solid fa-triangle-exclamation metric-ic" aria-hidden="true"></i>
+                <span class="metric-val" id="stat-phish">—</span>
+                <span class="metric-lbl">تصيد</span>
+            </div>
+            <span class="metric-sep" aria-hidden="true"></span>
+            <div class="metric-item metric-item--ok">
+                <i class="fa-solid fa-shield-halved metric-ic" aria-hidden="true"></i>
+                <span class="metric-val" id="stat-legit">—</span>
+                <span class="metric-lbl">شرعي</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section analysis-section">
+    <div class="container container--form-wide">
+        <h2 class="section-title">تحليل نص + مرفقات</h2>
+        <p class="section-hint">الصق نص البريد أدناه، وإن وُجدت مرفقات (txt، html، pdf، صور) اخترها ليُستخرج نصها ويُدْمج مع التحليل. يمكنك ترك الحقل نصيّاً فارغاً إن كان كل المحتوى في الملفات.</p>
+
+        <form class="analyze-form" id="analyze-form" onsubmit="return false;" enctype="multipart/form-data">
+            <label class="visually-hidden" for="email-text">نص البريد</label>
+            <textarea id="email-text" name="email_text" rows="12" maxlength="5000" placeholder="نص الرسالة (النصي أو المستخرج)…"></textarea>
+            <p class="char-count" id="char-count" aria-live="polite">0 / 5000 حرف</p>
+
+            <div class="file-block">
+                <div class="file-block-head">
+                    <label for="file-attach" class="file-lbl">
+                        <i class="fa-solid fa-paperclip" aria-hidden="true"></i> مرفقات
+                    </label>
+                    <input class="file-inp" type="file" id="file-attach" name="files" multiple
+                        accept=".txt,.html,.htm,.pdf,.png,.jpg,.jpeg,.webp,.gif,.csv,.eml,image/*,application/pdf">
+                </div>
+                <p class="file-hint" id="file-hint">لا توجد مرفقات</p>
+            </div>
+
+            <div class="form-actions form-actions--analyze">
+                <button type="button" class="btn btn-primary" id="btn-analyze" onclick="analyzeEmail()">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <span class="btn-text">تحليل (نص + مرفقات)</span>
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-clear" onclick="clearForm()">
+                    <i class="fa-solid fa-eraser" aria-hidden="true"></i>
+                    <span>مسح</span>
+                </button>
+            </div>
+        </form>
+
+        <div class="result-box hidden" id="result-box" role="status">
+            <div class="result-inner" id="result-inner">
+            </div>
+            <p class="att-meta hidden" id="att-meta" aria-live="polite"></p>
+            <div class="confidence-wrap">
+                <span class="confidence-label" id="confidence-label">نسبة الثقة</span>
+                <div class="progress-outer" aria-hidden="true">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <span class="confidence-value" id="confidence-pct">0%</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section--mail">
+    <div class="container container--form-wide">
+        <h2 class="section-title">جلب وتحليل من صندوق البريد (IMAP)</h2>
+        <p class="section-hint section-hint--readable">يُنفّذ الربط <strong>محلياً</strong> ولا تُحفظ كلمة مرور IMAP في قاعدة البيانات. لربط نتائج التحليل <strong>بسجلك</strong> ولوحة التحكم، <a href="{{ url_for('auth.login') }}">سجّل الدخول</a> أولاً. لـ Gmail فعّل IMAP واستخدم <strong>كلمة مرور التطبيق</strong>، وفعّل الموافقة.</p>
+        <div class="mail-panel">
+            <label class="chk-row">
+                <input type="checkbox" id="mail-consent">
+                <span>أوافق على جلب آخر الرسائل من خادم البريد وتحليلها تلقائياً (يُرسل الربط فقط في هذه الجلسة).</span>
+            </label>
+
+            <div class="mail-row mail-row--server">
+                <div class="mail-field">
+                    <label for="imap-host">عنوان خادم IMAP</label>
+                    <input class="mail-inp" type="text" id="imap-host" placeholder="مثال: imap.gmail.com" autocomplete="off" inputmode="url">
+                </div>
+                <div class="mail-field mail-field--port">
+                    <label for="imap-port">المنفذ</label>
+                    <input class="mail-inp mail-inp-n" type="number" id="imap-port" value="993" min="1" max="65535">
+                </div>
+            </div>
+
+            <div class="mail-row mail-row--creds">
+                <div class="mail-field">
+                    <label for="imap-user">البريد الإلكتروني</label>
+                    <input class="mail-inp" type="email" id="imap-user" placeholder="name@gmail.com" autocomplete="username">
+                </div>
+                <div class="mail-field">
+                    <label for="imap-pwd">كلمة المرور (تطبيق / عادية)</label>
+                    <input class="mail-inp" type="password" id="imap-pwd" placeholder="••••••••" autocomplete="current-password">
+                </div>
+            </div>
+
+            <div class="mail-row mail-row--foot">
+                <div class="mail-field mail-field--limit">
+                    <label for="imap-limit">عدد الرسائل</label>
+                    <input class="mail-inp mail-inp-n" type="number" id="imap-limit" value="10" min="1" max="25">
+                </div>
+                <div class="mail-field mail-field--ssl">
+                    <label class="chk-inline chk-inline--box"><input type="checkbox" id="imap-ssl" checked> تشفير SSL (موصى به)</label>
+                </div>
+            </div>
+
+            <div class="mail-actions">
+                <button type="button" class="btn btn-primary btn--mail" id="btn-mail-fetch" onclick="fetchAndAnalyzeMail()">
+                    <i class="fa-solid fa-cloud-arrow-down" aria-hidden="true"></i>
+                    <span>جلب وتحليل</span>
+                </button>
+            </div>
+            <p class="mail-status hidden" id="mail-status" role="status"></p>
+        </div>
+    </div>
+</section>
+
+<section class="section how-section">
+    <div class="container">
+        <h2 class="section-title">خريطة العمل</h2>
+        <div class="workflow-map" role="list" aria-label="خريطة العمل">
+            <div class="wf-step" role="listitem">
+                <span class="wf-num">1</span>
+                <span class="wf-txt">إدخال نص و/أو مرفقات</span>
+            </div>
+            <i class="fa-solid fa-angles-left wf-arrow" aria-hidden="true"></i>
+            <div class="wf-step" role="listitem">
+                <span class="wf-num">2</span>
+                <span class="wf-txt">استخراج النص (PDF/ HTML / صور)</span>
+            </div>
+            <i class="fa-solid fa-angles-left wf-arrow" aria-hidden="true"></i>
+            <div class="wf-step" role="listitem">
+                <span class="wf-num">3</span>
+                <span class="wf-txt">تجهيز &amp; TF-IDF + Random Forest</span>
+            </div>
+            <i class="fa-solid fa-angles-left wf-arrow" aria-hidden="true"></i>
+            <div class="wf-step" role="listitem">
+                <span class="wf-num">4</span>
+                <span class="wf-txt">نتيجة + ثقة + تسجيل</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

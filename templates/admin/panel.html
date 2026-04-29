@@ -1,0 +1,192 @@
+{% extends "admin/base.html" %}
+{% block title %}نظام التشغيل — الملخّص{% endblock %}
+{% block body %}
+<div class="admin-shell" id="admin-app"
+  data-url-recompute="{{ url_for('admin.action_recompute') }}"
+  data-url-delete="{{ url_for('admin.action_delete') }}"
+  data-url-purge="{{ url_for('admin.action_purge') }}"
+  data-url-refresh="{{ url_for('admin.data_refresh') }}"
+  data-url-analysis-detail="{{ url_for('admin.data_analysis_detail') }}">
+    <aside class="admin-side">
+        <div class="admin-side-brand">
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+            <span>نظام التشغيل</span>
+        </div>
+        <nav class="admin-side-nav" aria-label="قائمة إدارية">
+            <a class="admin-side-link is-active" href="{{ url_for('admin.panel') }}"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i> الملخّص</a>
+            <a class="admin-side-link" href="#admin-users"><i class="fa-solid fa-users" aria-hidden="true"></i> المستخدمون</a>
+            <a class="admin-side-link" href="#admin-analyses"><i class="fa-solid fa-list" aria-hidden="true"></i> سجلات التحليل</a>
+            <a class="admin-side-link" href="{{ url_for('main.index') }}"><i class="fa-solid fa-house" aria-hidden="true"></i> واجهة المستخدم</a>
+        </nav>
+        <div class="admin-side-foot">
+            <a class="admin-side-exit" href="{{ url_for('admin.logout') }}"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> خروج</a>
+        </div>
+    </aside>
+    <div class="admin-main">
+        <header class="admin-top">
+            <h1 class="admin-page-title">الملخّص والرقابة</h1>
+        </header>
+
+        <section class="admin-stats admin-stats--6">
+            <div class="admin-stat">
+                <i class="fa-solid fa-users admin-stat-ic" aria-hidden="true"></i>
+                <span class="admin-stat-n" id="st-users">{{ user_count }}</span>
+                <span class="admin-stat-l">مستخدمون مسجّلون</span>
+            </div>
+            <div class="admin-stat">
+                <i class="fa-solid fa-list-check admin-stat-ic" aria-hidden="true"></i>
+                <span class="admin-stat-n" id="st-total">{{ stats.total }}</span>
+                <span class="admin-stat-l">سجلات التحليل (الكل)</span>
+            </div>
+            <div class="admin-stat is-warn">
+                <i class="fa-solid fa-user-slash admin-stat-ic" aria-hidden="true"></i>
+                <span class="admin-stat-n" id="st-orphan">{{ orphan_count }}</span>
+                <span class="admin-stat-l">سجلات بلا مستخدم (بذر/ضيف)</span>
+            </div>
+            <div class="admin-stat is-danger">
+                <i class="fa-solid fa-triangle-exclamation admin-stat-ic" aria-hidden="true"></i>
+                <span class="admin-stat-n" id="st-phish">{{ stats.phish }}</span>
+                <span class="admin-stat-l">تصيد (عالمي)</span>
+            </div>
+            <div class="admin-stat is-ok">
+                <i class="fa-solid fa-shield-halved admin-stat-ic" aria-hidden="true"></i>
+                <span class="admin-stat-n" id="st-legit">{{ stats.legit }}</span>
+                <span class="admin-stat-l">شرعي (عالمي)</span>
+            </div>
+            <div class="admin-stat">
+                <i class="fa-solid fa-chart-pie admin-stat-ic" aria-hidden="true"></i>
+                <span class="admin-stat-n" id="st-pp"><span id="st-pct-val">{{ stats.pp }}</span>٪</span>
+                <span class="admin-stat-l">نسبة التصيد</span>
+            </div>
+        </section>
+
+        <section class="admin-sys">
+            <h2 class="admin-h2"><i class="fa-solid fa-server" aria-hidden="true"></i> الحالة</h2>
+            <ul class="admin-sys-list">
+                <li><i class="fa-brands fa-python" aria-hidden="true"></i> نموذج التعلم: {% if model_exists %}<span class="ok">متوفر (model.pkl)</span>{% else %}<span class="bad">غير متوفر</span>{% endif %}</li>
+                <li><i class="fa-solid fa-database" aria-hidden="true"></i> قاعدة البيانات: <code class="admin-code">{{ db_path }}</code></li>
+            </ul>
+        </section>
+
+        <section class="admin-block" id="admin-users">
+            <h2 class="admin-h2"><i class="fa-solid fa-users" aria-hidden="true"></i> المستخدمون وبيانات الحساب</h2>
+            <p class="admin-lead">عرض كامل: البريد، الاسم، الهاتف، تاريخ التسجيل، وعدد تحليلات كل مستخدم (تصيد / شرعي). كلمة مرور الحساب <strong>لا</strong> تُخزَّن بصيغة واضحة ولا تُعرض.</p>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>المعرّف</th>
+                            <th>البريد</th>
+                            <th>الاسم</th>
+                            <th>الهاتف</th>
+                            <th>نبذة</th>
+                            <th>تاريخ التسجيل</th>
+                            <th>التحليلات</th>
+                            <th>تصيد</th>
+                            <th>شرعي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-tbody">
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td class="td-mail">{{ u.email|e }}</td>
+                            <td>{{ u.full_name|e if u.full_name else '—' }}</td>
+                            <td>{{ u.phone|e if u.phone else '—' }}</td>
+                            <td class="td-bio" title="{{ (u.bio or '')|e }}">{% if u.bio and (u.bio|length > 80) %}{{ (u.bio[:80] + '…')|e }}{% else %}{{ (u.bio or '—')|e }}{% endif %}</td>
+                            <td class="td-time">{{ u.created_at or '' }}</td>
+                            <td><strong>{{ u.analysis_count }}</strong></td>
+                            <td class="n-ph">{{ u.phishing_count }}</td>
+                            <td class="n-ok">{{ u.legitimate_count }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="9" class="td-empty">لا يوجد مستخدمون مسجّلون بعد.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="admin-block" id="admin-analyses">
+            <h2 class="admin-h2"><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i> سجلات التحليل التفصيلية</h2>
+            <p class="admin-lead">كل سطر مربوط بمستخدم إن وُجد؛ اضغط <strong>تفاصيل</strong> لقراءة النص الكامل والثقة ومعرّف المالك. التصفية حسب المستخدم أو البحث في المعاينة.</p>
+        </section>
+
+        <section class="admin-toolbar">
+            <div class="admin-toolbar-row">
+                <label class="admin-select-wrap" for="admin-user-filter">تصفية حسب المستخدم</label>
+                <select id="admin-user-filter" class="admin-select" aria-label="تصفية حسب المستخدم">
+                    <option value="">الكل</option>
+                    <option value="0">— بلا مستخدم (بذر/ضيف) —</option>
+                    {% for u in users %}
+                    <option value="{{ u.id }}">{{ u.email|e }} ({{ u.id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="admin-search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" id="admin-filter" class="admin-filter" placeholder="بحث في المعاينة أو بريد المستخدم…" aria-label="تصفية الجدول">
+            </div>
+            <div class="admin-tool-actions">
+                <button type="button" class="admin-btn-s admin-btn-ghost" id="btn-refresh-d"><i class="fa-solid fa-rotate" aria-hidden="true"></i> مزامنة</button>
+                <button type="button" class="admin-btn-s admin-btn-ghost" id="btn-recompute"><i class="fa-solid fa-calculator" aria-hidden="true"></i> إعادة الحساب</button>
+                <button type="button" class="admin-btn-s admin-btn-dang" id="btn-purge"><i class="fa-solid fa-eraser" aria-hidden="true"></i> تفريغ السجلات</button>
+            </div>
+        </section>
+
+        <div class="admin-table-wrap">
+            <table class="admin-table" id="admin-table">
+                <thead>
+                    <tr>
+                        <th>المعرّف</th>
+                        <th>المستخدم</th>
+                        <th>المعاينة</th>
+                        <th>النتيجة</th>
+                        <th>الثقة</th>
+                        <th>الوقت</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="admin-tbody">
+                    {% for row in analyses %}
+                    <tr data-row-id="{{ row.id }}" data-user-id="{{ row.user_id if row.user_id is not none else '' }}">
+                        <td>{{ row.id }}</td>
+                        <td class="td-user" title="{% if row.user_email %}{{ row.user_email|e }}{% else %}—{% endif %}">
+                            {% if row.user_id %}
+                            <span class="a-user-pill"><i class="fa-solid fa-user" aria-hidden="true"></i> {{ row.user_email|e }}</span>
+                            {% else %}
+                            <span class="a-user-none">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="td-prev">{{ row.email_preview|e }}</td>
+                        <td>{% if row.is_phishing %}<span class="a-badge a-bad">تصيد</span>{% else %}<span class="a-badge a-ok">شرعي</span>{% endif %}</td>
+                        <td>{{ row.confidence }}%</td>
+                        <td class="td-time">{{ row.analyzed_at or '' }}</td>
+                        <td class="td-actions td-actions-2">
+                            <button type="button" class="a-view" data-id="{{ row.id }}" title="تفاصيل كاملة"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></button>
+                            <button type="button" class="a-del" data-id="{{ row.id }}" title="حذف"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="td-empty">لا توجد سجلات تحليل.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="admin-modal" id="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title" hidden>
+    <div class="admin-modal-backdrop" data-close="1"></div>
+    <div class="admin-modal-card">
+        <div class="admin-modal-head">
+            <h2 id="admin-modal-title">تفاصيل التحليل</h2>
+            <button type="button" class="admin-modal-x" data-close="1" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="admin-modal-body" id="admin-modal-body">
+            <p class="admin-muted">جارٍ التحميل…</p>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
