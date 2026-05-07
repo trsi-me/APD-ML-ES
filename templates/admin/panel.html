@@ -1,5 +1,5 @@
 {% extends "admin/base.html" %}
-{% block title %}نظام التشغيل — الملخّص{% endblock %}
+{% block title %}الواجهة — الملخّص{% endblock %}
 {% block body %}
 <div class="admin-shell" id="admin-app"
   data-url-recompute="{{ url_for('admin.action_recompute') }}"
@@ -10,7 +10,7 @@
     <aside class="admin-side">
         <div class="admin-side-brand">
             <i class="fa-solid fa-sliders" aria-hidden="true"></i>
-            <span>نظام التشغيل</span>
+            <span>الواجهة</span>
         </div>
         <nav class="admin-side-nav" aria-label="قائمة إدارية">
             <a class="admin-side-link is-active" href="{{ url_for('admin.panel') }}"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i> الملخّص</a>
